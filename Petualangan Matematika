@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Petualangan Bilangan: Misi 100.000</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --secondary: #f59e0b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --info: #0284c7;
+      --bg: #eef4ff;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #dbe4f0;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, #dbeafe 0, transparent 25%),
+        radial-gradient(circle at 90% 20%, #fef3c7 0, transparent 25%),
+        linear-gradient(135deg, #eef4ff, #f8fafc);
+      color: var(--text);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1050px, 94%);
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* OPENING */
+    .start-card {
+      min-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .city {
+      width: min(850px, 100%);
+      padding: 36px 28px;
+      background: rgba(255,255,255,.94);
+      border: 2px solid rgba(79,70,229,.12);
+      border-radius: 32px;
+      box-shadow: 0 20px 60px rgba(30,41,59,.12);
+    }
+
+    .logo {
+      font-size: 76px;
+      margin-bottom: 5px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .start-card h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 4rem);
+      color: var(--primary);
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--muted);
+      margin: 14px auto 24px;
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    .instructions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 25px 0;
+    }
+
+    .instruction {
+      padding: 18px;
+      background: #f8fafc;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+    }
+
+    .instruction .icon {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .instruction strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .instruction span {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.4;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 15px 28px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 18px rgba(79,70,229,.25);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary-btn:active,
+    .secondary-btn:active {
+      transform: translateY(1px);
+    }
+
+    .start-btn {
+      font-size: 1.15rem;
+      min-width: 210px;
+    }
+
+    /* GAME HEADER */
+    .game-header {
+      background: rgba(255,255,255,.96);
+      border-radius: 22px;
+      padding: 17px;
+      box-shadow: 0 10px 35px rgba(30,41,59,.08);
+      margin-bottom: 18px;
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .game-title {
+      font-weight: 900;
+      color: var(--primary);
+      font-size: 1.15rem;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8fafc;
+      padding: 9px 13px;
+      border-radius: 13px;
+      white-space: nowrap;
+      font-weight: 800;
+    }
+
+    .progress-wrap {
+      margin-top: 14px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #4f46e5, #06b6d4);
+      border-radius: inherit;
+      transition: width .35s ease;
+    }
+
+    /* GAME CARD */
+    .game-card {
+      background: rgba(255,255,255,.97);
+      border-radius: 28px;
+      padding: clamp(20px, 5vw, 42px);
+      box-shadow: 0 15px 45px rgba(30,41,59,.10);
+      min-height: 530px;
+    }
+
+    .level-label {
+      display: inline-flex;
+      padding: 7px 13px;
+      background: #eef2ff;
+      color: var(--primary);
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: .9rem;
+      margin-bottom: 16px;
+    }
+
+    .question {
+      font-size: clamp(1.35rem, 3.5vw, 2rem);
+      line-height: 1.45;
+      font-weight: 800;
+      margin: 5px 0 28px;
+      text-align: center;
+    }
+
+    .number-display {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 900;
+      color: var(--primary);
+      text-align: center;
+      margin: 15px 0 25px;
+      letter-spacing: 2px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .option-btn {
+      background: #f8fafc;
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 17px;
+      padding: 17px 15px;
+      min-height: 66px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 750;
+      transition: .15s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: #eef2ff;
+      transform: translateY(-2px);
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .option-btn.correct {
+      border-color: var(--success);
+      background: #dcfce7;
+      color: #166534;
+      animation: correctPop .35s ease;
+    }
+
+    .option-btn.wrong {
+      border-color: var(--danger);
+      background: #fee2e2;
+      color: #991b1b;
+      animation: shake .35s ease;
+    }
+
+    @keyframes correctPop {
+      50% { transform: scale(1.03); }
+    }
+
+    @keyframes shake {
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-3px); }
+    }
+
+    .feedback {
+      margin: 24px auto 0;
+      max-width: 800px;
+      border-radius: 18px;
+      padding: 17px;
+      line-height: 1.55;
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+      animation: fadeUp .25s ease;
+    }
+
+    .feedback.correct {
+      background: #ecfdf5;
+      border: 2px solid #86efac;
+      color: #166534;
+    }
+
+    .feedback.wrong {
+      background: #fff7ed;
+      border: 2px solid #fdba74;
+      color: #9a3412;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feedback-title {
+      font-weight: 900;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .next-wrap {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .next-btn {
+      display: none;
+    }
+
+    .next-btn.show {
+      display: inline-block;
+    }
+
+    /* RESULT */
+    .result-card {
+      background: rgba(255,255,255,.97);
+      border-radius: 30px;
+      padding: clamp(25px, 6vw, 50px);
+      box-shadow: 0 15px 50px rgba(30,41,59,.11);
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+
+    .result-card h2 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      color: var(--primary);
+      margin: 0 0 10px;
+    }
+
+    .final-score {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 900;
+      color: var(--secondary);
+      margin: 10px 0 25px;
+    }
+
+    .result-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      max-width: 650px;
+      margin: 0 auto 30px;
+    }
+
+    .result-stat {
+      padding: 18px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .result-stat .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .result-stat .label {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .reflection {
+      max-width: 700px;
+      margin: 0 auto 25px;
+      text-align: left;
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 18px;
+      border-left: 5px solid var(--primary);
+    }
+
+    .reflection p {
+      margin: 9px 0;
+      line-height: 1.5;
+    }
+
+    .reflection strong {
+      color: var(--primary-dark);
+    }
+
+    .stars {
+      font-size: 2.1rem;
+      letter-spacing: 4px;
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 700px) {
+      .app {
+        width: 94%;
+        padding-top: 12px;
+      }
+
+      .start-card {
+        min-height: auto;
+        padding: 20px 0;
+      }
+
+      .city {
+        padding: 25px 17px;
+        border-radius: 24px;
+      }
+
+      .logo {
+        font-size: 56px;
+      }
+
+      .instructions {
+        grid-template-columns: 1fr;
+      }
+
+      .top-row {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .game-title {
+        grid-column: 1 / -1;
+      }
+
+      .stat {
+        justify-content: center;
+        font-size: .85rem;
+      }
+
+      .game-card {
+        padding: 22px 15px;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .result-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .top-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .game-title {
+        grid-column: 1 / -1;
+      }
+
+      .stat:last-child {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- =========================
+         LAYAR PEMBUKA
+    ========================== -->
+    <section id="startScreen" class="screen active">
+      <div class="start-card">
+        <div class="city">
+          <div class="logo">🏙️🔢⭐</div>
+
+          <h1>Petualangan Bilangan</h1>
+          <h2>Misi 100.000</h2>
+
+          <p class="subtitle">
+            Selamat datang di <strong>Kota Matematika!</strong>
+            Jadilah penjelajah hebat dan selesaikan berbagai tantangan
+            bilangan untuk membuka area kota dan mengumpulkan bintang.
+          </p>
+
+          <div class="instructions">
+            <div class="instruction">
+              <span class="icon">🧠</span>
+              <strong>Pahami Soal</strong>
+              <span>Baca pertanyaan dengan teliti sebelum memilih jawaban.</span>
+            </div>
+
+            <div class="instruction">
+              <span class="icon">⭐</span>
+              <strong>Kumpulkan Bintang</strong>
+              <span>Jawaban benar akan menambah skor dan bintangmu.</span>
+            </div>
+
+            <div class="instruction">
+              <span class="icon">❤️</span>
+              <strong>Jaga Nyawa</strong>
+              <span>Kamu memiliki 3 nyawa. Tetap semangat jika salah!</span>
+            </div>
+          </div>
+
+          <button id="startBtn" class="primary-btn start-btn">
+            🚀 Mulai Petualangan
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================
+         LAYAR PERMAINAN
+    ========================== -->
+    <section id="gameScreen" class="screen">
+
+      <header class="game-header">
+        <div class="top-row">
+          <div class="game-title">🏙️ Misi 100.000</div>
+
+          <div class="stat">
+            ⭐ <span id="scoreDisplay">0</span>
+          </div>
+
+          <div class="stat">
+            ❤️ <span id="livesDisplay">3</span>
+          </div>
+
+          <div class="stat">
+            🎯 <span id="questionDisplay">1/20</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-info">
+            <span>Progress Petualangan</span>
+            <span id="progressText">0%</span>
+          </div>
+
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+      </header>
+
+      <article class="game-card">
+        <div id="levelLabel" class="level-label">
+          Level 1 • Pemula
+        </div>
+
+        <div id="questionText" class="question"></div>
+
+        <div id="numberDisplay" class="number-display hidden"></div>
+
+        <div id="options" class="options"></div>
+
+        <div id="feedback" class="feedback">
+          <div id="feedbackTitle" class="feedback-title"></div>
+          <div id="feedbackText"></div>
+        </div>
+
+        <div class="next-wrap">
+          <button id="nextBtn" class="primary-btn next-btn">
+            Lanjut ➜
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <!-- =========================
+         LAYAR HASIL
+    ========================== -->
+    <section id="resultScreen" class="screen">
+      <div class="result-card">
+        <div class="result-icon">🏆</div>
+
+        <h2>Petualangan Selesai!</h2>
+
+        <div id="resultMessage" class="subtitle"></div>
+
+        <div id="finalScore" class="final-score">0 ⭐</div>
+
+        <div id="starsDisplay" class="stars"></div>
+
+        <div class="result-stats">
+          <div class="result-stat">
+            <span id="correctDisplay" class="value">0</span>
+            <span class="label">Jawaban Benar</span>
+          </div>
+
+          <div class="result-stat">
+            <span id="wrongDisplay" class="value">0</span>
+            <span class="label">Jawaban Salah</span>
+          </div>
+
+          <div class="result-stat">
+            <span id="accuracyDisplay" class="value">0%</span>
+            <span class="label">Ketepatan</span>
+          </div>
+        </div>
+
+        <div class="reflection">
+          <p>
+            💭 <strong>Konsep mana yang sudah kamu kuasai?</strong>
+          </p>
+          <p>
+            💭 <strong>Bagian mana yang perlu kamu latih lagi?</strong>
+          </p>
+          <p>
+            Ingat, kesalahan bukan kegagalan. Kesalahan membantu kita
+            menemukan bagian yang perlu dipelajari lagi. Tetap semangat! 🌟
+          </p>
+        </div>
+
+        <button id="restartBtn" class="primary-btn">
+          🔄 Main Lagi
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    "use strict";
+
+    /* ==========================================================
+       PETUALANGAN BILANGAN: MISI 100.000
+       JavaScript murni - tanpa library eksternal
+       ========================================================== */
+
+    const TOTAL_QUESTIONS = 20;
+    const STARTING_LIVES = 3;
+    const POINTS_PER_CORRECT = 10;
+
+    let questions = [];
+    let currentQuestion = 0;
+    let score = 0;
+    let lives = STARTING_LIVES;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let answered = false;
+
+    const startScreen = document.getElementById("startScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const resultScreen = document.getElementById("resultScreen");
+
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const livesDisplay = document.getElementById("livesDisplay");
+    const questionDisplay = document.getElementById("questionDisplay");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    const levelLabel = document.getElementById("levelLabel");
+    const questionText = document.getElementById("questionText");
+    const numberDisplay = document.getElementById("numberDisplay");
+    const options = document.getElementById("options");
+
+    const feedback = document.getElementById("feedback");
+    const feedbackTitle = document.getElementById("feedbackTitle");
+    const feedbackText = document.getElementById("feedbackText");
+
+    const finalScore = document.getElementById("finalScore");
+    const correctDisplay = document.getElementById("correctDisplay");
+    const wrongDisplay = document.getElementById("wrongDisplay");
+    const accuracyDisplay = document.getElementById("accuracyDisplay");
+    const starsDisplay = document.getElementById("starsDisplay");
+    const resultMessage = document.getElementById("resultMessage");
+
+    /* ==========================================================
+       AUDIO
+       ========================================================== */
+
+    let audioContext = null;
+
+    function initAudio() {
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+      } catch (error) {
+        // Audio tidak wajib agar gim tetap berjalan.
+      }
+    }
+
+    function playTone(frequency, duration, type = "sine", volume = 0.06) {
+      if (!audioContext) return;
+
+      try {
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(
+          frequency,
+          audioContext.currentTime
+        );
+
+        gain.gain.setValueAtTime(volume, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          audioContext.currentTime + duration
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration);
+      } catch (error) {
+        // Abaikan error audio agar permainan tetap berjalan.
+      }
+    }
+
+    function playCorrectSound() {
+      initAudio();
+      playTone(523.25, 0.12, "sine", 0.05);
+
+      setTimeout(() => {
+        playTone(659.25, 0.14, "sine", 0.05);
+      }, 100);
+
+      setTimeout(() => {
+        playTone(783.99, 0.18, "sine", 0.05);
+      }, 210);
+    }
+
+    function playWrongSound() {
+      initAudio();
+      playTone(220, 0.18, "sawtooth", 0.035);
+
+      setTimeout(() => {
+        playTone(165, 0.22, "sawtooth", 0.03);
+      }, 130);
+    }
+
+    /* ==========================================================
+       UTILITAS
+       ========================================================== */
+
+    function shuffle(array) {
+      const result = [...array];
+
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+
+      return result;
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function formatNumber(number) {
+      return number.toLocaleString("id-ID");
+    }
+
+    function showScreen(screen) {
+      [startScreen, gameScreen, resultScreen].forEach((element) => {
+        element.classList.remove("active");
+      });
+
+      screen.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* ==========================================================
+       PEMBUATAN SOAL
+       ========================================================== */
+
+    function makeQuestion(question, answer, distractors, explanation, level, type) {
+      const allOptions = shuffle([
+        String(answer),
+        ...distractors.map(String)
+      ]);
+
+      return {
+        question,
+        answer: String(answer),
+        options: allOptions,
+        explanation,
+        level,
+        type
+      };
+    }
+
+    function generateQuestions() {
+      const bank = [];
+
+      /* ----------------------------------------------------------
+         LEVEL 1 - Nilai Tempat dan Nilai Angka
+         ---------------------------------------------------------- */
+
+      bank.push(
+        makeQuestion(
+          "Pada bilangan 47.325, angka 7 menempati nilai tempat ...",
+          "ribuan",
+          ["ratusan", "puluhan", "satuan"],
+          "Pada 47.325, angka 7 berada di posisi ribuan.",
+          1,
+          "nilai tempat"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Pada bilangan 68.214, nilai angka 8 adalah ...",
+          "8.000",
+          ["800", "80", "8"],
+          "Angka 8 berada di tempat ribuan, sehingga nilainya adalah 8.000.",
+          1,
+          "nilai angka"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Nilai tempat angka 5 pada bilangan 25.641 adalah ...",
+          "ribuan",
+          ["puluh ribuan", "ratusan", "puluhan"],
+          "Bilangan 25.641 memiliki 5 pada posisi ribuan.",
+          1,
+          "nilai tempat"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Nilai angka 9 pada bilangan 93.407 adalah ...",
+          "90.000",
+          ["9.000", "900", "90"],
+          "Angka 9 berada di tempat puluh ribuan, jadi nilainya 90.000.",
+          1,
+          "nilai angka"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Angka yang menempati tempat ratusan pada bilangan 72.586 adalah ...",
+          "5",
+          ["7", "8", "6"],
+          "Pada 72.586, urutannya adalah 7 puluh ribuan, 2 ribuan, 5 ratusan, 8 puluhan, 6 satuan.",
+          1,
+          "nilai tempat"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Bentuk panjang dari 34.205 adalah ...",
+          "30.000 + 4.000 + 200 + 5",
+          [
+            "30.000 + 400 + 20 + 5",
+            "3.000 + 4.000 + 200 + 5",
+            "30.000 + 4.000 + 20 + 5"
+          ],
+          "34.205 = 30.000 + 4.000 + 200 + 5.",
+          1,
+          "bentuk panjang"
+        )
+      );
+
+      /* ----------------------------------------------------------
+         LEVEL 2 - Membandingkan Bilangan
+         ---------------------------------------------------------- */
+
+      bank.push(
+        makeQuestion(
+          "Bilangan manakah yang paling besar?",
+          "56.780",
+          ["56.708", "56.087", "55.999"],
+          "Bandingkan dari puluh ribuan lalu ribuan. 56.780 paling besar.",
+          2,
+          "membandingkan"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Pernyataan yang benar adalah ...",
+          "42.315 > 42.135",
+          [
+            "42.315 < 42.135",
+            "42.315 = 42.135",
+            "42.315 < 41.999"
+          ],
+          "Kedua bilangan sama-sama 42 ribuan. Karena 315 lebih besar dari 135, maka 42.315 > 42.135.",
+          2,
+          "membandingkan"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Bilangan manakah yang paling kecil?",
+          "18.905",
+          ["19.085", "18.950", "19.005"],
+          "18 ribuan lebih kecil daripada 19 ribuan. Di antara bilangan 18 ribuan, 18.905 paling kecil.",
+          2,
+          "membandingkan"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Tanda yang tepat untuk 73.450 ... 73.405 adalah ...",
+          ">",
+          ["<", "=", "≤"],
+          "Kedua bilangan memiliki 73 ribuan. 450 lebih besar daripada 405, sehingga tandanya >.",
+          2,
+          "membandingkan"
+        )
+      );
+
+      /* ----------------------------------------------------------
+         LEVEL 3 - Mengurutkan Bilangan
+         ---------------------------------------------------------- */
+
+      bank.push(
+        makeQuestion(
+          "Urutan dari yang terkecil ke terbesar adalah ...",
+          "12.450, 12.540, 12.504, 12.540",
+          [
+            "12.450, 12.504, 12.540, 12.540",
+            "12.540, 12.504, 12.450, 12.540",
+            "12.504, 12.450, 12.540, 12.540"
+          ],
+          "Perhatikan: 12.450 < 12.504 < 12.540. Karena 12.540 muncul dua kali, keduanya berurutan.",
+          3,
+          "mengurutkan"
+        )
+      );
+
+      /*
+       * Soal di atas memiliki dua angka yang sama.
+       * Agar tidak membingungkan, soal ini akan diganti dengan
+       * versi empat bilangan yang semuanya berbeda.
+       */
+      bank[10] = makeQuestion(
+        "Urutan dari yang terkecil ke terbesar adalah ...",
+        "12.450, 12.504, 12.540, 12.580",
+        [
+          "12.450, 12.540, 12.504, 12.580",
+          "12.580, 12.540, 12.504, 12.450",
+          "12.504, 12.450, 12.580, 12.540"
+        ],
+        "Urutan yang benar adalah 12.450 < 12.504 < 12.540 < 12.580.",
+        3,
+        "mengurutkan"
+      );
+
+      bank.push(
+        makeQuestion(
+          "Urutan dari terbesar ke terkecil adalah ...",
+          "45.800, 45.080, 44.999, 44.099",
+          [
+            "44.099, 44.999, 45.080, 45.800",
+            "45.080, 45.800, 44.099, 44.999",
+            "45.800, 44.999, 45.080, 44.099"
+          ],
+          "Mulai dari bilangan terbesar: 45.800, lalu 45.080, 44.999, dan 44.099.",
+          3,
+          "mengurutkan"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Urutan dari terkecil ke terbesar adalah ...",
+          "7.890, 8.009, 8.090, 8.900",
+          [
+            "8.009, 7.890, 8.090, 8.900",
+            "8.900, 8.090, 8.009, 7.890",
+            "7.890, 8.090, 8.009, 8.900"
+          ],
+          "7.890 paling kecil, kemudian 8.009, 8.090, dan 8.900.",
+          3,
+          "mengurutkan"
+        )
+      );
+
+      /* ----------------------------------------------------------
+         LEVEL 4 - Penjumlahan dan Pengurangan
+         ---------------------------------------------------------- */
+
+      bank.push(
+        makeQuestion(
+          "Hasil dari 24.500 + 13.250 adalah ...",
+          "37.750",
+          ["36.750", "37.250", "38.750"],
+          "24.500 + 13.250 = 37.750.",
+          4,
+          "operasi hitung"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Hasil dari 65.000 - 27.500 adalah ...",
+          "37.500",
+          ["38.500", "36.500", "37.250"],
+          "65.000 dikurangi 27.500 sama dengan 37.500.",
+          4,
+          "operasi hitung"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Hasil dari 18.750 + 21.125 adalah ...",
+          "39.875",
+          ["39.775", "40.875", "38.875"],
+          "18.750 + 21.125 = 39.875.",
+          4,
+          "operasi hitung"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Hasil dari 90.000 - 45.675 adalah ...",
+          "44.325",
+          ["45.325", "44.425", "43.325"],
+          "90.000 - 45.675 = 44.325.",
+          4,
+          "operasi hitung"
+        )
+      );
+
+      /* ----------------------------------------------------------
+         LEVEL 5 - Operasi Hitung dan Soal Cerita
+         ---------------------------------------------------------- */
+
+      bank.push(
+        makeQuestion(
+          "Perpustakaan memiliki 25.000 buku. Sebanyak 7.500 buku dipinjam. Sisa buku adalah ...",
+          "17.500",
+          ["18.500", "17.000", "16.500"],
+          "25.000 - 7.500 = 17.500 buku.",
+          5,
+          "soal cerita"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Sebuah toko memiliki 12.500 pensil. Toko menerima 5.250 pensil lagi. Jumlah pensil sekarang ...",
+          "17.750",
+          ["17.250", "18.750", "16.750"],
+          "12.500 + 5.250 = 17.750 pensil.",
+          5,
+          "soal cerita"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Hasil dari 75.000 - 18.750 + 2.500 adalah ...",
+          "58.750",
+          ["56.250", "59.750", "57.500"],
+          "Kerjakan dari kiri: 75.000 - 18.750 = 56.250, lalu 56.250 + 2.500 = 58.750.",
+          5,
+          "operasi hitung"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Budi memiliki 40.000 poin. Ia mendapat tambahan 12.500 poin, lalu menggunakan 7.500 poin. Sisa poin Budi adalah ...",
+          "45.000",
+          ["42.500", "44.000", "47.500"],
+          "40.000 + 12.500 = 52.500, kemudian 52.500 - 7.500 = 45.000.",
+          5,
+          "soal cerita"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Hasil dari 32.450 + 14.550 - 10.000 adalah ...",
+          "37.000",
+          ["36.000", "38.000", "47.000"],
+          "32.450 + 14.550 = 47.000, kemudian 47.000 - 10.000 = 37.000.",
+          5,
+          "operasi hitung"
+        )
+      );
+
+      bank.push(
+        makeQuestion(
+          "Bilangan yang tepat untuk melengkapi 45.000 + ... = 68.500 adalah ...",
+          "23.500",
+          ["22.500", "24.500", "25.500"],
+          "68.500 - 45.000 = 23.500.",
+          5,
+          "operasi hitung"
+        )
+      );
+
+      return shuffle(bank).slice(0, TOTAL_QUESTIONS);
+    }
+
+    /* ==========================================================
+       LEVEL
+       ========================================================== */
+
+    function getLevelName(level) {
+      const names = {
+        1: "Pemula",
+        2: "Penjelajah",
+        3: "Ahli Urutan",
+        4: "Jago Hitung",
+        5: "Master Bilangan"
+      };
+
+      return names[level] || "Penjelajah";
+    }
+
+    /* ==========================================================
+       MULAI PERMAINAN
+       ========================================================== */
+
+    function startGame() {
+      initAudio();
+
+      questions = generateQuestions();
+
+      currentQuestion = 0;
+      score = 0;
+      lives = STARTING_LIVES;
+      correctAnswers = 0;
+      wrongAnswers = 0;
+      answered = false;
+
+      updateHeader();
+      showScreen(gameScreen);
+      renderQuestion();
+    }
+
+    /* ==========================================================
+       HEADER
+       ========================================================== */
+
+    function updateHeader() {
+      scoreDisplay.textContent = score;
+      livesDisplay.textContent = lives;
+      questionDisplay.textContent =
+        `${Math.min(currentQuestion + 1, TOTAL_QUESTIONS)}/${TOTAL_QUESTIONS}`;
+
+      const completed = currentQuestion / TOTAL_QUESTIONS;
+      const percentage = Math.round(completed * 100);
+
+      progressBar.style.width = `${percentage}%`;
+      progressText.textContent = `${percentage}%`;
+    }
+
+    /* ==========================================================
+       MENAMPILKAN SOAL
+       ========================================================== */
+
+    function renderQuestion() {
+      if (currentQuestion >= questions.length || lives <= 0) {
+        finishGame();
+        return;
+      }
+
+      answered = false;
+
+      const item = questions[currentQuestion];
+
+      levelLabel.textContent =
+        `Level ${item.level} • ${getLevelName(item.level)}`;
+
+      questionText.textContent = item.question;
+
+      numberDisplay.classList.add("hidden");
+      numberDisplay.textContent = "";
+
+      options.innerHTML = "";
+
+      feedback.className = "feedback";
+      feedbackTitle.textContent = "";
+      feedbackText.textContent = "";
+
+      nextBtn.classList.remove("show");
+
+      item.options.forEach((option, index) => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "option-btn";
+        button.textContent = option;
+        button.dataset.option = option;
+        button.setAttribute(
+          "aria-label",
+          `Pilihan jawaban ${index + 1}: ${option}`
+        );
+
+        button.addEventListener("click", () => {
+          handleAnswer(button, option, item);
+        });
+
+        options.appendChild(button);
+      });
+
+      updateHeader();
+    }
+
+    /* ==========================================================
+       MEMPROSES JAWABAN
+       ========================================================== */
+
+    function handleAnswer(selectedButton, selectedAnswer, item) {
+      if (answered) return;
+
+      answered = true;
+
+      const allButtons = options.querySelectorAll(".option-btn");
+
+      allButtons.forEach((button) => {
+        button.disabled = true;
+
+        if (button.dataset.option === item.answer) {
+          button.classList.add("correct");
+        }
+      });
+
+      if (selectedAnswer === item.answer) {
+        score += POINTS_PER_CORRECT;
+        correctAnswers++;
+
+        selectedButton.classList.add("correct");
+
+        feedback.className = "feedback correct show";
+        feedbackTitle.textContent = "🎉 Jawaban benar!";
+        feedbackText.innerHTML =
+          `<strong>Hebat!</strong> ${item.explanation}`;
+
+        playCorrectSound();
+      } else {
+        lives = Math.max(0, lives - 1);
+        wrongAnswers++;
+
+        selectedButton.classList.add("wrong");
+
+        feedback.className = "feedback wrong show";
+        feedbackTitle.textContent = "💡 Belum tepat, tidak apa-apa!";
+        feedbackText.innerHTML =
+          `<strong>Jawaban yang benar: ${item.answer}</strong><br>${item.explanation}`;
+
+        playWrongSound();
+      }
+
+      updateHeader();
+
+      if (lives <= 0) {
+        nextBtn.textContent = "Lihat Hasil 🏆";
+      } else if (currentQuestion >= questions.length - 1) {
+        nextBtn.textContent = "Lihat Hasil 🏆";
+      } else {
+        nextBtn.textContent = "Lanjut ➜";
+      }
+
+      nextBtn.classList.add("show");
+    }
+
+    /* ==========================================================
+       SOAL BERIKUTNYA
+       ========================================================== */
+
+    function nextQuestion() {
+      if (!answered) return;
+
+      currentQuestion++;
+
+      if (currentQuestion >= questions.length || lives <= 0) {
+        finishGame();
+        return;
+      }
+
+      renderQuestion();
+    }
+
+    /* ==========================================================
+       HASIL AKHIR
+       ========================================================== */
+
+    function finishGame() {
+      showScreen(resultScreen);
+
+      const totalAnswered = correctAnswers + wrongAnswers;
+      const accuracy =
+        totalAnswered > 0
+          ? Math.round((correctAnswers / totalAnswered) * 100)
+          : 0;
+
+      finalScore.textContent = `${score} ⭐`;
+      correctDisplay.textContent = correctAnswers;
+      wrongDisplay.textContent = wrongAnswers;
+      accuracyDisplay.textContent = `${accuracy}%`;
+
+      let stars = "";
+
+      if (accuracy >= 90) {
+        stars = "⭐⭐⭐⭐⭐";
+        resultMessage.textContent =
+          "Luar biasa! Kamu menjelajah Kota Matematika dengan sangat baik!";
+      } else if (accuracy >= 75) {
+        stars = "⭐⭐⭐⭐";
+        resultMessage.textContent =
+          "Hebat! Kemampuan bilanganmu semakin kuat. Terus berlatih!";
+      } else if (accuracy >= 60) {
+        stars = "⭐⭐⭐";
+        resultMessage.textContent =
+          "Bagus! Kamu sudah memiliki dasar yang baik. Ayo terus berlatih!";
+      } else if (accuracy >= 40) {
+        stars = "⭐⭐";
+        resultMessage.textContent =
+          "Tetap semangat! Coba perhatikan kembali nilai tempat dan langkah berhitung.";
+      } else {
+        stars = "⭐";
+        resultMessage.textContent =
+          "Jangan menyerah! Setiap latihan membuat kemampuanmu semakin baik.";
+      }
+
+      starsDisplay.textContent = stars;
+    }
+
+    /* ==========================================================
+       EVENT LISTENER
+       ========================================================== */
+
+    startBtn.addEventListener("click", startGame);
+
+    restartBtn.addEventListener("click", startGame);
+
+    nextBtn.addEventListener("click", nextQuestion);
+
+    /* ==========================================================
+       PENGECEKAN AWAL
+       ========================================================== */
+
+    // Pastikan layar awal aktif ketika halaman pertama kali dibuka.
+    showScreen(startScreen);
+  </script>
+</body>
+</html>
